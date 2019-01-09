@@ -12,28 +12,27 @@ serialPort = function(doc, COM_PORT) {
   });
 
   port.open(function(err) {
-    if (err) {
-      return console.log('Error opening port: ', err.message);
-    }
+    if (err) return console.log('Error opening port: ', err.message);
   });
 
 // The open event is always emitted
   port.on('open', function() {
-    console.log('port connected');
+    console.log('Port connected at: ' + COM_PORT + '\n\n' + 'You may begin writing now.');
   });
 
   port.on('data', data => {
     const op = data.toJSON();
     if (op.type !== 'Buffer') return new Error('Cannot read this type of stream.');
     console.log(op);
-    bufferToOps(op.data);
+    bufferToOps(op.data, doc);
   });
 
-  SerialConnection.list(function(err, ports) {
-    ports.forEach(function(port) {
-      console.log(port.comName);
-    });
-  });
+  // Lists available COM ports available on the computer.
+  // SerialConnection.list(function(err, ports) {
+  //   ports.forEach(function(port) {
+  //     console.log(port.comName);
+  //   });
+  // });
 };
 
 module.exports = serialPort;

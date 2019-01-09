@@ -1,6 +1,6 @@
-const bufferToOps = ops => {
+const bufferToOps = (ops, doc) => {
   /*
-  Takes an array of binary data ops and translates
+  Takes an array of buffer array and translates
   them to ShareDB ones:
     32 = space
     8 = backspace
@@ -8,31 +8,39 @@ const bufferToOps = ops => {
     10 = linefeed
   */
 
+  let deletes = 0;
+
   for (let i = 0; i < ops.length; i++) {
-    let deletes = 0;
-    let opToApply = [];
+    let docEnd = doc.data.length;
 
     switch (ops[i]) {
       case 8:
-        opToApply.push([11, {d: deletes}]);
+        deletes += 1;
         console.log('backspace');
         break;
       case 32:
-        opToApply.push([11, ' ']);
+        doc.submitOp([docEnd, ' ']);
         console.log('space');
         break;
       case 13:
-        opToApply.push([11, '\r']);
+        doc.submitOp([docEnd, '\n']);
         console.log('carriage return');
         break;
       case 10:
-        opToApply.push([11, '\n']);
+        doc.submitOp([docEnd, '\n']);
         console.log('line feed');
         break;
       default:
-        opToApply.push(ops[i].toString('utf8'));
-        console.log(ops[i].toString('utf8'));
+        doc.submitOp([docEnd, String.fromCharCode(ops[i])]);
+        console.log([docEnd, String.fromCharCode(ops[i])]);
         break;
+    }
+  }
+  // Aggregate all the delete commands and wait until the end.
+  if (deletes > 0) {
+    if (doc.data.length > deletes) {
+      doc.submitOp([doc.data.length - deletes, {d: deletes}]);
+      deletes = 0;
     }
   }
 };

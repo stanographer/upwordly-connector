@@ -3,7 +3,7 @@ const ReconnectingWebSocket = require('reconnecting-websocket');
 const otText = require('ot-text');
 const ws = require('ws');
 
-return module.exports = {
+module.exports = {
   connect: function(HOST, PORT) {
     const host = HOST || 'localhost';
     const port = PORT || '9090';
