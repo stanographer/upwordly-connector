@@ -2,7 +2,7 @@ const SerialConnection = require('serialport');
 const bufferToOps = require('./bufferToOps');
 
 serialPort = function(doc, COM_PORT) {
-  const port = new SerialConnection(`\\\\.\\${COM_PORT}`, {
+  const port = new SerialConnection(`\\\\.\\${ COM_PORT }`, {
     autoOpen: false,
     baudRate: 9600,
     parity: 'even',
@@ -24,7 +24,7 @@ serialPort = function(doc, COM_PORT) {
     const op = data.toJSON();
     if (op.type !== 'Buffer') return new Error('Cannot read this type of stream.');
     console.log(op);
-    bufferToOps(op.data, doc);
+    doc.submitOp(bufferToOps(op.data, doc));
   });
 
   // Lists available COM ports available on the computer.

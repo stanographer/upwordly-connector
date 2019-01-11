@@ -9,39 +9,45 @@ const bufferToOps = (ops, doc) => {
   */
 
   let deletes = 0;
+  let content = [];
+  let docEnd = doc.data.length;
 
   for (let i = 0; i < ops.length; i++) {
-    let docEnd = doc.data.length;
-
     switch (ops[i]) {
       case 8:
         deletes += 1;
         console.log('backspace');
         break;
       case 32:
-        doc.submitOp([docEnd, ' ']);
+        content.push(' ');
         console.log('space');
         break;
       case 13:
-        doc.submitOp([docEnd, '\n']);
+        content.push('\r');
         console.log('carriage return');
         break;
       case 10:
-        doc.submitOp([docEnd, '\n']);
+        content.push('\n');
         console.log('line feed');
         break;
       default:
-        doc.submitOp([docEnd, String.fromCharCode(ops[i])]);
-        console.log([docEnd, String.fromCharCode(ops[i])]);
+        content.push(String.fromCharCode(ops[i]));
         break;
     }
   }
-  // Aggregate all the delete commands and wait until the end.
+  // Batch all the delete commands and send at the end.
   if (deletes > 0) {
     if (doc.data.length > deletes) {
-      doc.submitOp([doc.data.length - deletes, {d: deletes}]);
-      deletes = 0;
+      console.log([doc.data.length - deletes, {d: deletes}]);
+      return [doc.data.length - deletes, {d: deletes}];
     }
+    deletes = 0;
+    // Batch all content and send at end.
+  } else if (content.length > 0) {
+    console.log([docEnd, content.join('')]);
+    return [docEnd, content.join('')];
+  } else {
+    return null;
   }
 };
 
